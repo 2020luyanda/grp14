@@ -1,0 +1,6 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "cmake.ignoreCMakeListsMissing": true,
+    "xml.server.preferBinary": true,
+    "xml.server.silenceExtensionWarning": true
+}

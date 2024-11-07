@@ -1,0 +1,60 @@
+  Future<void> _registerUser(String name, String studentNumber, String email,
+      String res, File? image) async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        UserCredential userCredential =
+            await FirebaseAuth.instance.signInAnonymously();
+        User? user = userCredential.user;
+
+        if (user != null) {
+          String? imageUrl = image != null ? await _uploadImage(image) : null;
+
+          Map<String, dynamic> userData = {
+            'name': name,
+            'studentNumber': studentNumber,
+            'email': email,
+            'res': res,
+            'imageUrl': imageUrl ?? 'No image available',
+            'userId': user.uid,
+            'timestamp': FieldValue.serverTimestamp(),
+          };
+
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .set(userData);
+
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Registration Complete'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _image == null
+                      ? const Text('No image selected')
+                      : Image.file(_image!, fit: BoxFit.cover),
+                  const SizedBox(height: 10),
+                  Text(_faceDetectionMessage),
+                  const SizedBox(height: 10),
+                  Text('Name: $name'),
+                  Text('Student Number: $studentNumber'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } catch (e) {
+        developer.log('Error during registration: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error during registration: $e')),
+        );
+      }
+    }
+  }
